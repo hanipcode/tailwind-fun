@@ -16,7 +16,7 @@ tailwind-fun is a powerful and intuitive library designed to revolutionize the w
 ## Example Usages
 
 it can always be chainable
-```
+```typescript
 // Create a new instance of TWSClass
 const tws = new TWSClass('bg-red-500');
 
@@ -47,7 +47,7 @@ console.log(tws.className); // Output: 'bg-red-500 font-bold cursor-pointer ring
 it is useful when you need to add complex logic to an element
 
 
-```
+```tsx
 import { TWS } from "tailwind-fun";
 
 type DateRowProps = { dates: readonly Date[] };
