@@ -1,103 +1,146 @@
-# TSDX User Guide
+# Tailwind Fun
+Introducing tailwind-fun: Simplify and Manage Tailwind CSS Class Names with Ease!
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with TSDX. Let’s get you oriented with what’s here and how to use it.
+tailwind-fun is a powerful and intuitive library designed to revolutionize the way you handle Tailwind CSS class names. With its declarative approach, you can effortlessly write and manage Tailwind class names as strings, enabling you to create dynamic and responsive designs like never before.
 
-> This TSDX setup is meant for developing libraries (not apps!) that can be published to NPM. If you’re looking to build a Node app, you could use `ts-node-dev`, plain `ts-node`, or simple `tsc`.
+## Features:
 
-> If you’re new to TypeScript, checkout [this handy cheatsheet](https://devhints.io/typescript)
+1. Declarative Syntax: Say goodbye to manually concatenating class names! With tailwind-fun, you can construct class names using a fluent and expressive syntax, resulting in cleaner and more maintainable code.
 
-## Commands
+2. Conditional Class Binding: Easily handle dynamic class names based on conditions. The addWhen() method allows you to add classes only when specific conditions are met, streamlining your logic and enhancing code readability.
 
-TSDX scaffolds your new library inside `/src`.
+3. Variant Support: Take advantage of Tailwind's powerful variant system. tailwind-fun simplifies the process of adding variants to class names, making it effortless to incorporate hover, focus, active, and other states into your designs.
 
-To run TSDX, use:
+4. Compact and Lightweight: Designed to be lightweight and efficient, tailwind-fun seamlessly integrates with your project. It provides a minimal footprint and ensures optimal performance, so you can focus on building exceptional user experiences.
 
-```bash
-npm start # or yarn start
+## Example Usages
+
+it can always be chainable
+```
+// Create a new instance of TWSClass
+const tws = new TWSClass('bg-red-500');
+
+// Add a class name
+tws.add('text-white');
+console.log(tws.className); // Output: 'bg-red-500 text-white'
+
+// Add a class name conditionally using if-else
+const isLoggedIn = true;
+tws.addIfElse(isLoggedIn, 'font-bold', 'font-normal');
+console.log(tws.className); // Output: 'bg-red-500 text-white font-bold'
+
+// Add a class name unless a condition is true
+const isDisabled = false;
+tws.addUnless(isDisabled, 'cursor-pointer');
+console.log(tws.className); // Output: 'bg-red-500 text-white font-bold cursor-pointer'
+
+// Add a class name based on a condition
+const isActive = true;
+tws.addWhen(isActive, 'ring-2 ring-blue-500');
+console.log(tws.className); // Output: 'bg-red-500 text-white font-bold cursor-pointer ring-2 ring-blue-500'
+
+// Remove a class name
+tws.remove('text-white');
+console.log(tws.className); // Output: 'bg-red-500 font-bold cursor-pointer ring-2 ring-blue-500'
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
+it is useful when you need to add complex logic to an element
 
-To do a one-off build, use `npm run build` or `yarn build`.
 
-To run tests, use `npm test` or `yarn test`.
+```
+import { TWS } from "tailwind-fun";
 
-## Configuration
+type DateRowProps = { dates: readonly Date[] };
 
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
+const overlayClass = (
+  isSelected: boolean,
+  isToday: boolean,
+  isSameMonth: boolean
+) =>
+  TWS("absolute h-[36px] w-[36px] top-[-5.5px] left-[-7.5px] rounded-full")
+    .addWhen(isSelected, "bg-selectedBlue")
+    .addWhen(isToday, "border-selectedBlue border")
+    .addVariants("group-hover", "bg-white z-10");
 
-### Jest
+export const DateRow = consumeDateReducer<DateRowProps>(
+  ({ dates, selectedMonth, dispatch, isSelected }) => (
+    <div className="flex gap-5 mb-3 ">
+      {dates.map((date) => (
+        <button
+          onClick={() => dispatch({ type: "UpdateDate", date })}
+          className={
+            TWS("flex-1 grow text-center relative group").addWhen(
+              !isSameMonth(selectedMonth, date),
+              "opacity-50"
+            ).className
+          }
+        >
+          <div
+            className={
+              overlayClass(
+                isSelected(date),
+                isToday(date),
+                isSameMonth(selectedMonth, date)
+              ).className
+            }
+          ></div>
+          <span className={TWS("relative group-hover:text-dark").className}>
+            {getDate(date)}
+          </span>
+        </button>
+      ))}
+    </div>
+  )
+);
 
-Jest tests are set up to run with `npm test` or `yarn test`.
-
-### Bundle Analysis
-
-[`size-limit`](https://github.com/ai/size-limit) is set up to calculate the real cost of your library with `npm run size` and visualize the bundle with `npm run analyze`.
-
-#### Setup Files
-
-This is the folder structure we set up for you:
-
-```txt
-/src
-  index.tsx       # EDIT THIS
-/test
-  blah.test.tsx   # EDIT THIS
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
 ```
 
-### Rollup
+## API
 
-TSDX uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
+### TWSClass
 
-### TypeScript
+The `TWSClass` is a class that represents a Tailwind CSS class string. It has methods for adding, removing, and modifying classes based on various conditions and variants.
 
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
+#### Constructor
 
-## Continuous Integration
+The `constructor` method initializes the `_className` property with the provided class name.
 
-### GitHub Actions
+#### Properties
 
-Two actions are added by default:
+- `className`: _(Getter)_ Returns the current class name.
 
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [`size-limit`](https://github.com/ai/size-limit)
+#### Methods
 
-## Optimizations
+- `add(className: string)`: Adds a new class name to an existing list of class names.
 
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
+- `addIfElse(condition: boolean | BooleanFN, classNameRight: string, classNameLeft: string)`: Adds a class name to an element based on a condition using an if-else statement.
 
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
+- `addUnless(condition: boolean | BooleanFN, className: string)`: Adds a class name to an element's class list unless a condition is true.
 
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
-}
-```
+- `addWhen(condition: boolean | BooleanFN, className: string)`: Adds a class name to an element's existing class list based on a given condition.
 
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
+- `remove(className: string)`: Removes a specified class name from the element's class list.
 
-## Module Formats
+- `removeUnless(condition: boolean | BooleanFN, className: string)`: Removes a specified class name from an element's class list unless a given condition is true.
 
-CJS, ESModules, and UMD module formats are supported.
+- `removeWhen(condition: boolean | BooleanFN, className: string)`: Removes a specified class name from an element's class list based on a given condition.
 
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
+- `addHover(className: string)`: Adds a CSS class to an element to enable hover effects.
 
-## Named Exports
+- `addHoverWhen(condition: boolean | BooleanFN, className: string)`: Adds a CSS class to an element when a certain condition is met, specifically for hover effects.
 
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
+- `addHoverUnless(condition: boolean | BooleanFN, className: string)`: Adds a hover effect to an element unless a condition is met.
 
-## Including Styles
+- `removeHover(className: string)`: Removes a CSS class that is used for hover effects.
 
-There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
+- `removeHoverWhen(condition: boolean | BooleanFN, className: string)`: Removes a CSS class from an element when a certain condition is met, specifically for hover effects.
 
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
+- `removeHoverUnless(condition: boolean | BooleanFN, className: string)`: Removes a CSS class from an element unless a condition is met, with the class being converted to a hover class.
 
-## Publishing to NPM
+- `addVariants(variants: string, className: string)`: Adds variants to a class name and returns the modified class name.
 
-We recommend using [np](https://github.com/sindresorhus/np).
+- `removeVariants(variants: string, className: string)`: Removes a given class name and its variants from an element.
+
+- `addVariantsWhen(condition: boolean | BooleanFN, variants: string, className: string)`: Adds a Tailwind class to an element based on a condition and a set of variants.
+
+- `removeVariantsWhen(condition: boolean | BooleanFN, variants: string, className: string)`: Removes a given class name from an element's class list based on a condition and a set of Tailwind variants.
