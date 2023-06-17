@@ -27,7 +27,7 @@ export class TWSClass {
   public get className(): string {
     return this._className;
   }
-  private set className(className: string) {
+  public set className(className: string) {
     this._className = className;
   }
 
